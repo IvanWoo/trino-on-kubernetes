@@ -1,0 +1,11 @@
+image:
+  # https://github.com/trinodb/charts/pull/18
+  # query.max-total-memory-per-node was removed from trino 369
+  tag: 368
+
+additionalCatalogs:
+  postgresql: |
+    connector.name=postgresql
+    connection-url=jdbc:postgresql://my-postgresql:5432/trino_demo
+    connection-user=trino_demo_user
+    connection-password=trino_demo_password
