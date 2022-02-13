@@ -49,7 +49,7 @@ verify the installation
 ```sh
 kubectl run --namespace trino my-minio-client \
      --rm --tty -i --restart='Never' \
-     --env MINIO_SERVER_ROOT_USER=minio_accesss_key \
+     --env MINIO_SERVER_ROOT_USER=minio_access_key \
      --env MINIO_SERVER_ROOT_PASSWORD=minio_secret_key \
      --env MINIO_SERVER_HOST=my-minio \
      --image docker.io/bitnami/minio-client:2022.2.7-debian-10-r0 -- admin info minio
@@ -135,12 +135,21 @@ SHOW CATALOGS;
 
   Catalog
 ------------
+ blackhole
  minio
  postgresql
  system
  tpcds
  tpch
-(5 rows)
+(6 rows)
+```
+
+### blackhole connector
+
+```sh
+CREATE SCHEMA blackhole.test;
+CREATE TABLE blackhole.test.orders AS SELECT * from tpch.tiny.orders;
+INSERT INTO blackhole.test.orders SELECT * FROM tpch.sf3.orders;
 ```
 
 ### postgresql connector
