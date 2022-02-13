@@ -32,6 +32,43 @@ kubectl run my-postgresql-client --rm --tty -i --restart='Never' --namespace tri
 (1 row)
 ```
 
+### hive-metastore
+
+follow the [gradiant hive-metastore chart](https://github.com/Gradiant/bigdata-charts/tree/master/charts/hive-metastore) to install hive-metastore
+
+```sh
+helm repo add bigdata-gradiant https://gradiant.github.io/bigdata-charts/
+```
+
+```sh
+helm upgrade --install my-hive-metastore bigdata-gradiant/hive-metastore -n trino -f hive-metastore/values.yaml
+```
+
+verify the installation
+
+```sh
+kubectl run my-postgresql-client --rm --tty -i --restart='Never' --namespace trino --image docker.io/bitnami/postgresql:14.1.0-debian-10-r80 --env="PGPASSWORD=hive" -- psql --host my-hive-metastore-postgresql -U hive -d metastore -p 5432 -c "\dt"
+```
+
+```sh
+                 List of relations
+ Schema |           Name            | Type  | Owner
+--------+---------------------------+-------+-------
+ public | BUCKETING_COLS            | table | hive
+ public | CDS                       | table | hive
+ public | COLUMNS_V2                | table | hive
+ public | DATABASE_PARAMS           | table | hive
+ public | DBS                       | table | hive
+ public | DB_PRIVS                  | table | hive
+ public | DELEGATION_TOKENS         | table | hive
+ public | FUNCS                     | table | hive
+ public | FUNC_RU                   | table | hive
+ public | GLOBAL_PRIVS              | table | hive
+ public | IDXS                      | table | hive
+ public | INDEX_PARAMS              | table | hive
+ ...
+```
+
 ### trino
 
 follow the [trino official chart](https://github.com/trinodb/charts/tree/main) to install trino
@@ -78,8 +115,7 @@ SHOW SCHEMAS IN postgresql;
 Using the PostgreSQL connector, Trino is able to retrieve the data for processing, returning the results to the user
 
 ```sh
-USE postgresql.public;
-SELECT * FROM users LIMIT 10;
+SELECT * FROM postgresql.public.users LIMIT 10;
 
  id |          hash_firstname          |          hash_lastname           | gender
 ----+----------------------------------+----------------------------------+--------
@@ -101,6 +137,7 @@ SELECT * FROM users LIMIT 10;
 ```sh
 helm uninstall my-trino -n trino
 helm uninstall my-postgresql -n trino
+helm uninstall my-hive-metastore -n trino
 kubectl delete pvc --all -n trino
 kubectl delete namespace trino
 ```
