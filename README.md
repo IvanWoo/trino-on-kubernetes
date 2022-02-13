@@ -69,6 +69,38 @@ kubectl run my-postgresql-client --rm --tty -i --restart='Never' --namespace tri
  ...
 ```
 
+### minio
+
+follow the [bitnami minio chart](https://github.com/bitnami/charts/tree/master/bitnami/minio) to install minio
+
+```sh
+helm repo add bitnami https://charts.bitnami.com/bitnami
+```
+
+```sh
+helm upgrade --install my-minio bitnami/minio -n trino -f minio/values.yaml
+```
+
+verify the installation
+
+```sh
+kubectl run --namespace trino my-minio-client \
+     --rm --tty -i --restart='Never' \
+     --env MINIO_SERVER_ROOT_USER=minio_accesss_key \
+     --env MINIO_SERVER_ROOT_PASSWORD=minio_secret_key \
+     --env MINIO_SERVER_HOST=my-minio \
+     --image docker.io/bitnami/minio-client:2022.2.7-debian-10-r0 -- admin info minio
+```
+
+```sh
+●  my-minio:9000
+   Uptime: 7 minutes
+   Version: 2022-02-07T08:17:33Z
+   Network: 1/1 OK
+
+0 B Used, 1 Bucket, 0 Objects
+```
+
 ### trino
 
 follow the [trino official chart](https://github.com/trinodb/charts/tree/main) to install trino
@@ -138,6 +170,7 @@ SELECT * FROM postgresql.public.users LIMIT 10;
 helm uninstall my-trino -n trino
 helm uninstall my-postgresql -n trino
 helm uninstall my-hive-metastore -n trino
+helm uninstall my-minio -n trino
 kubectl delete pvc --all -n trino
 kubectl delete namespace trino
 ```

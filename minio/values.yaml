@@ -1,0 +1,5 @@
+auth:
+  rootUser: minio_accesss_key
+  rootPassword: minio_secret_key
+
+defaultBuckets: "tiny"
