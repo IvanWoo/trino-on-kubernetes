@@ -32,7 +32,42 @@ kubectl run my-postgresql-client --rm --tty -i --restart='Never' --namespace tri
 (1 row)
 ```
 
+### minio
+
+follow the [bitnami minio chart](https://github.com/bitnami/charts/tree/master/bitnami/minio) to install minio
+
+```sh
+helm repo add bitnami https://charts.bitnami.com/bitnami
+```
+
+```sh
+helm upgrade --install my-minio bitnami/minio -n trino -f minio/values.yaml
+```
+
+verify the installation
+
+```sh
+kubectl run --namespace trino my-minio-client \
+     --rm --tty -i --restart='Never' \
+     --env MINIO_SERVER_ROOT_USER=minio_accesss_key \
+     --env MINIO_SERVER_ROOT_PASSWORD=minio_secret_key \
+     --env MINIO_SERVER_HOST=my-minio \
+     --image docker.io/bitnami/minio-client:2022.2.7-debian-10-r0 -- admin info minio
+```
+
+```sh
+●  my-minio:9000
+   Uptime: 7 minutes
+   Version: 2022-02-07T08:17:33Z
+   Network: 1/1 OK
+
+0 B Used, 2 Buckets, 0 Objects
+```
+
 ### hive-metastore
+
+FIXME: build my own custom docker image of hive-metastore, b/c [bde2020/hive](https://github.com/big-data-europe/docker-hive/issues/17) is missing the aws sdk
+FIXME: build my own helm chart based on costumed image
 
 follow the [gradiant hive-metastore chart](https://github.com/Gradiant/bigdata-charts/tree/master/charts/hive-metastore) to install hive-metastore
 
@@ -69,38 +104,6 @@ kubectl run my-postgresql-client --rm --tty -i --restart='Never' --namespace tri
  ...
 ```
 
-### minio
-
-follow the [bitnami minio chart](https://github.com/bitnami/charts/tree/master/bitnami/minio) to install minio
-
-```sh
-helm repo add bitnami https://charts.bitnami.com/bitnami
-```
-
-```sh
-helm upgrade --install my-minio bitnami/minio -n trino -f minio/values.yaml
-```
-
-verify the installation
-
-```sh
-kubectl run --namespace trino my-minio-client \
-     --rm --tty -i --restart='Never' \
-     --env MINIO_SERVER_ROOT_USER=minio_accesss_key \
-     --env MINIO_SERVER_ROOT_PASSWORD=minio_secret_key \
-     --env MINIO_SERVER_HOST=my-minio \
-     --image docker.io/bitnami/minio-client:2022.2.7-debian-10-r0 -- admin info minio
-```
-
-```sh
-●  my-minio:9000
-   Uptime: 7 minutes
-   Version: 2022-02-07T08:17:33Z
-   Network: 1/1 OK
-
-0 B Used, 1 Bucket, 0 Objects
-```
-
 ### trino
 
 follow the [trino official chart](https://github.com/trinodb/charts/tree/main) to install trino
@@ -119,19 +122,28 @@ verify the installation
 kubectl exec -it deploy/my-trino-coordinator -n trino -- trino
 ```
 
-in the trino shell
+## playground
+
+all of the sql is running in the trino shell
+
+```sh
+kubectl exec -it deploy/my-trino-coordinator -n trino -- trino
+```
 
 ```sh
 SHOW CATALOGS;
 
   Catalog
 ------------
+ minio
  postgresql
  system
  tpcds
  tpch
-(4 rows)
+(5 rows)
 ```
+
+### postgresql connector
 
 ```sh
 SHOW SCHEMAS IN postgresql;
@@ -162,6 +174,14 @@ SELECT * FROM postgresql.public.users LIMIT 10;
   9 | b16c10f0095e21667959bca5e40d982a | 8da0d3afc36dbb79435d80731cb81fc6 | female
  10 | 4a97230b2c83d6964534762ae92687be | f4a61b78eac4e2a23a595a38145304eb | female
 (10 rows)
+```
+
+### hive connector
+
+follow [Hive connector over MinIO file storage tutorial](https://github.com/bitsondatadev/trino-getting-started/tree/main/hive/trino-minio) to test the hive connector
+
+```sh
+SHOW SCHEMAS IN minio;
 ```
 
 ## Cleanup
