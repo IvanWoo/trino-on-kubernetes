@@ -262,3 +262,9 @@ helm uninstall my-minio -n trino
 kubectl delete pvc --all -n trino
 kubectl delete namespace trino
 ```
+
+## References
+- [realtimedatalake/hive-metastore-docker: Containerized Apache Hive Metastore for horizontally scalable Hive Metastore deployments](https://github.com/realtimedatalake/hive-metastore-docker)
+- [liangjingyang/hive-metastore](https://github.com/liangjingyang/hive-metastore/commit/112ce99241f5b68d9f45b775ce49e0550634c194)
+- [Gradiant/bigdata-charts: charts/hive-metastore](https://github.com/Gradiant/bigdata-charts/tree/master/charts/hive-metastore)
+- [bitsondatadev/trino-getting-started: Hive connector over MinIO file storage](https://github.com/bitsondatadev/trino-getting-started/tree/main/hive/trino-minio)
