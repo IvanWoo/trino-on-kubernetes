@@ -66,42 +66,62 @@ kubectl run --namespace trino my-minio-client \
 
 ### hive-metastore
 
-FIXME: build my own custom docker image of hive-metastore, b/c [bde2020/hive](https://github.com/big-data-europe/docker-hive/issues/17) is missing the aws sdk
-FIXME: build my own helm chart based on costumed image
+#### hive-metastore-postgresql
 
-follow the [gradiant hive-metastore chart](https://github.com/Gradiant/bigdata-charts/tree/master/charts/hive-metastore) to install hive-metastore
+follow the [bitnami postgresql chart](https://github.com/bitnami/charts/tree/master/bitnami/postgresql) to install postgresql for hive-metastore
 
 ```sh
-helm repo add bigdata-gradiant https://gradiant.github.io/bigdata-charts/
+helm repo add bitnami https://charts.bitnami.com/bitnami
 ```
 
 ```sh
-helm upgrade --install my-hive-metastore bigdata-gradiant/hive-metastore -n trino -f hive-metastore/values.yaml
+helm upgrade --install hive-metastore-postgresql bitnami/postgresql -n trino -f hive-metastore-postgresql/values.yaml
 ```
 
 verify the installation
 
 ```sh
-kubectl run my-postgresql-client --rm --tty -i --restart='Never' --namespace trino --image docker.io/bitnami/postgresql:14.1.0-debian-10-r80 --env="PGPASSWORD=hive" -- psql --host my-hive-metastore-postgresql -U hive -d metastore -p 5432 -c "\dt"
+kubectl run hive-metastore-postgresql-client --rm --tty -i --restart='Never' --namespace trino --image docker.io/bitnami/postgresql:14.1.0-debian-10-r80 --env="PGPASSWORD=admin" -- psql --host hive-metastore-postgresql -U admin -d metastore_db -p 5432 -c "\du"
 ```
 
 ```sh
-                 List of relations
- Schema |           Name            | Type  | Owner
---------+---------------------------+-------+-------
- public | BUCKETING_COLS            | table | hive
- public | CDS                       | table | hive
- public | COLUMNS_V2                | table | hive
- public | DATABASE_PARAMS           | table | hive
- public | DBS                       | table | hive
- public | DB_PRIVS                  | table | hive
- public | DELEGATION_TOKENS         | table | hive
- public | FUNCS                     | table | hive
- public | FUNC_RU                   | table | hive
- public | GLOBAL_PRIVS              | table | hive
- public | IDXS                      | table | hive
- public | INDEX_PARAMS              | table | hive
- ...
+                                   List of roles
+ Role name |                         Attributes                         | Member of
+-----------+------------------------------------------------------------+-----------
+ admin     | Create DB                                                  | {}
+ postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+```
+
+#### hive-metastore
+
+using the helm chart (based on the [gradiant hive-metastore chart](https://github.com/Gradiant/bigdata-charts/tree/master/charts/hive-metastore)) to install hive-metastore
+
+```sh
+helm upgrade --install my-hive-metastore -n trino -f hive-metastore/values.yaml ./charts/hive-metastore
+```
+
+verify the installation
+
+```sh
+kubectl run hive-metastore-postgresql-client --rm --tty -i --restart='Never' --namespace trino --image docker.io/bitnami/postgresql:14.1.0-debian-10-r80 --env="PGPASSWORD=admin" -- psql --host hive-metastore-postgresql -U admin -d metastore_db -p 5432 -c "\dt"
+```
+
+```sh
+                   List of relations
+ Schema |             Name              | Type  | Owner
+--------+-------------------------------+-------+-------
+ public | BUCKETING_COLS                | table | admin
+ public | CDS                           | table | admin
+ public | COLUMNS_V2                    | table | admin
+ public | CTLGS                         | table | admin
+ public | DATABASE_PARAMS               | table | admin
+ public | DBS                           | table | admin
+ public | DB_PRIVS                      | table | admin
+ public | DELEGATION_TOKENS             | table | admin
+ public | FUNCS                         | table | admin
+ public | FUNC_RU                       | table | admin
+ public | GLOBAL_PRIVS                  | table | admin
+...
 ```
 
 ### trino
@@ -193,12 +213,51 @@ follow [Hive connector over MinIO file storage tutorial](https://github.com/bits
 SHOW SCHEMAS IN minio;
 ```
 
+```sh
+       Schema
+--------------------
+ default
+ information_schema
+```
+
+```sh
+CREATE SCHEMA minio.tiny
+WITH (location = 's3a://tiny/');
+```
+
+```sh
+CREATE TABLE minio.tiny.customer
+WITH (
+    format = 'ORC',
+    external_location = 's3a://tiny/customer/'
+) 
+AS SELECT * FROM tpch.tiny.customer;
+```
+
+```sh
+SELECT * FROM minio.tiny.customer LIMIT 50;
+```
+
+```sh
+SHOW SCHEMAS IN minio;
+```
+
+```sh
+       Schema
+--------------------
+ default
+ information_schema
+ tiny
+(3 rows)
+```
+
 ## Cleanup
 
 ```sh
 helm uninstall my-trino -n trino
 helm uninstall my-postgresql -n trino
 helm uninstall my-hive-metastore -n trino
+helm uninstall hive-metastore-postgresql -n trino
 helm uninstall my-minio -n trino
 kubectl delete pvc --all -n trino
 kubectl delete namespace trino

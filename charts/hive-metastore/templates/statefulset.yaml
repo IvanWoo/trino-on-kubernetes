@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "hiveMetastore.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "hiveMetastore.name" . }}
+    app.kubernetes.io/component: metastore
+    {{- include "hiveMetastore.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "hiveMetastore.name" . }}
+      app.kubernetes.io/component: metastore
+      app.kubernetes.io/instance: {{ .Release.Name | quote }}
+  serviceName: {{ include "hiveMetastore.fullname" . }}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "hiveMetastore.name" . }}
+        app.kubernetes.io/component: metastore
+        app.kubernetes.io/instance: {{ .Release.Name | quote }}
+    spec:
+      containers:
+      - name: metastore
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+        resources:
+          {{- toYaml .Values.resources | indent 10 }}
+        env:
+          {{- toYaml .Values.env | nindent 10 }}
+        command:
+        - "bash"
+        - "entrypoint/entrypoint.sh"
+        # readinessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: 16010
+        #   initialDelaySeconds: 5
+        #   timeoutSeconds: 2
+        # livenessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: 16010
+        #   initialDelaySeconds: 10
+        #   timeoutSeconds: 2
+        ports:
+        - containerPort: 9083
+          name: thrift
+        volumeMounts:
+        - name: hive-config
+          mountPath: /opt/apache-hive-metastore-3.1.2-bin/conf
+        - name: entrypoint
+          mountPath: /opt/entrypoint
+      volumes:
+      - name: hive-config
+        configMap:
+          name: {{ include "hiveMetastore.fullname" . }}
+      - name: entrypoint
+        configMap:
+          name: {{ include "hiveMetastore.fullname" . }}-entrypoint
