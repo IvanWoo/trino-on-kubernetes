@@ -1,4 +1,31 @@
-# trino-on-kubernetes
+# trino-on-kubernetes <!-- omit in toc -->
+
+Trino is a federated query engine, the connector-based architecture makes it easy to integrate with other systems.
+
+In this repo, we are using the [Kubernetes](https://kubernetes.io/) to deploy the Trino service and other systems.
+
+- [prerequisites](#prerequisites)
+- [setup](#setup)
+  - [postgresql](#postgresql)
+  - [minio](#minio)
+  - [hive-metastore](#hive-metastore)
+    - [hive-metastore-postgresql](#hive-metastore-postgresql)
+    - [hive-metastore](#hive-metastore-1)
+  - [trino](#trino)
+- [playground](#playground)
+  - [blackhole connector](#blackhole-connector)
+  - [postgresql connector](#postgresql-connector)
+  - [hive connector](#hive-connector)
+- [cleanup](#cleanup)
+- [references](#references)
+
+
+## prerequisites
+- [Rancher Desktop](https://github.com/rancher-sandbox/rancher-desktop): `1.0.1`
+- Kubernetes: `v1.22.6`
+- kubectl `v1.23.3`
+- Helm: `v3.7.2`
+
 
 ## setup
 
@@ -251,7 +278,7 @@ SHOW SCHEMAS IN minio;
 (3 rows)
 ```
 
-## Cleanup
+## cleanup
 
 ```sh
 helm uninstall my-trino -n trino
@@ -263,7 +290,7 @@ kubectl delete pvc --all -n trino
 kubectl delete namespace trino
 ```
 
-## References
+## references
 - [realtimedatalake/hive-metastore-docker: Containerized Apache Hive Metastore for horizontally scalable Hive Metastore deployments](https://github.com/realtimedatalake/hive-metastore-docker)
 - [liangjingyang/hive-metastore](https://github.com/liangjingyang/hive-metastore/commit/112ce99241f5b68d9f45b775ce49e0550634c194)
 - [Gradiant/bigdata-charts: charts/hive-metastore](https://github.com/Gradiant/bigdata-charts/tree/master/charts/hive-metastore)
