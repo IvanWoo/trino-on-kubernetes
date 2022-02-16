@@ -13,3 +13,7 @@ conf:
     fs.s3a.access.key: minio_access_key
     fs.s3a.secret.key: minio_secret_key
     fs.s3a.path.style.access: true
+
+hiveMetastoreDb:
+  host: hive-metastore-postgresql
+  port: 5432

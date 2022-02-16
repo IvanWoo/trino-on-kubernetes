@@ -6,6 +6,7 @@ In this repo, we are using the [Kubernetes](https://kubernetes.io/) to deploy th
 
 - [prerequisites](#prerequisites)
 - [setup](#setup)
+  - [namespace](#namespace)
   - [postgresql](#postgresql)
   - [minio](#minio)
   - [hive-metastore](#hive-metastore)
@@ -31,8 +32,10 @@ In this repo, we are using the [Kubernetes](https://kubernetes.io/) to deploy th
 
 tl;dr: `bash scrips/up.sh`
 
+### namespace
+
 ```sh
-kubectl create namespace trino
+kubectl create namespace trino --dry-run=client -o yaml | kubectl apply -f -
 ```
 
 ### postgresql
@@ -299,3 +302,4 @@ kubectl delete namespace trino
 - [liangjingyang/hive-metastore](https://github.com/liangjingyang/hive-metastore/commit/112ce99241f5b68d9f45b775ce49e0550634c194)
 - [Gradiant/bigdata-charts: charts/hive-metastore](https://github.com/Gradiant/bigdata-charts/tree/master/charts/hive-metastore)
 - [bitsondatadev/trino-getting-started: Hive connector over MinIO file storage](https://github.com/bitsondatadev/trino-getting-started/tree/main/hive/trino-minio)
+- [bitsondatadev/hive-metastore: entrypoint.sh](https://github.com/bitsondatadev/hive-metastore/blob/master/scripts/entrypoint.sh)

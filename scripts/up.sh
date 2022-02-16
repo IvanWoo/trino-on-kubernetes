@@ -7,7 +7,7 @@ BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="${BASE_DIR}/.."
 (
 cd ${REPO_DIR}
-kubectl create namespace trino
+kubectl create namespace trino --dry-run=client -o yaml | kubectl apply -f -
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add bitnami https://charts.bitnami.com/bitnami

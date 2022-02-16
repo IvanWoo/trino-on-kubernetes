@@ -7,3 +7,15 @@ resources: {}
 conf:
   hiveSite:
     hive.metastore.uris: thrift://hive-metastore:9083
+extraEnvVars: []
+
+waitDb:
+  enabled: true
+  image:
+    repository: busybox
+    tag: latest
+    pullPolicy: IfNotPresent
+
+hiveMetastoreDb:
+  host: hive-metastore-postgresql
+  port: 5432
