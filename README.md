@@ -29,6 +29,8 @@ In this repo, we are using the [Kubernetes](https://kubernetes.io/) to deploy th
 
 ## setup
 
+tl;dr: `bash scrips/up.sh`
+
 ```sh
 kubectl create namespace trino
 ```
@@ -279,6 +281,8 @@ SHOW SCHEMAS IN minio;
 ```
 
 ## cleanup
+
+tl;dr: `bash scrips/down.sh`
 
 ```sh
 helm uninstall my-trino -n trino

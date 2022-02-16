@@ -13,5 +13,5 @@ name: hive-metastore
 sources:
   - https://github.com/apache/hive
   - https://github.com/gradiant/charts
-  - https://github.com/big-data-europe/docker-hive
+  - https://github.com/realtimedatalake/hive-metastore-docker
 version: 0.0.1

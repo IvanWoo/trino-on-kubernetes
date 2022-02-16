@@ -16,7 +16,7 @@ The Apache Hive™ data warehouse software facilitates reading, writing, and man
 
 * <https://github.com/apache/hive>
 * <https://github.com/gradiant/charts>
-* <https://github.com/big-data-europe/docker-hive>
+* <https://github.com/realtimedatalake/hive-metastore-docker>
 
 ## Values
 
