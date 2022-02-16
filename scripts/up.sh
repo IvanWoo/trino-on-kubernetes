@@ -9,8 +9,6 @@ REPO_DIR="${BASE_DIR}/.."
 cd ${REPO_DIR}
 kubectl create namespace trino --dry-run=client -o yaml | kubectl apply -f -
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add trino https://trinodb.github.io/charts/
 helm upgrade --install my-postgresql bitnami/postgresql -n trino -f postgresql/values.yaml
 helm upgrade --install my-minio bitnami/minio -n trino -f minio/values.yaml
