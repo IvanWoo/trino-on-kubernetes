@@ -165,7 +165,7 @@ helm repo add trino https://trinodb.github.io/charts/
 ```
 
 ```sh
-helm upgrade --install my-trino trino/trino --version 0.3.0 --namespace trino -f trino/values.yaml
+helm upgrade --install my-trino trino/trino --version 0.4.0 --namespace trino -f trino/values.yaml
 ```
 
 verify the installation

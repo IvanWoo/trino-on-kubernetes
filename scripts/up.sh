@@ -14,5 +14,5 @@ helm upgrade --install my-postgresql bitnami/postgresql -n trino -f postgresql/v
 helm upgrade --install my-minio bitnami/minio -n trino -f minio/values.yaml
 helm upgrade --install hive-metastore-postgresql bitnami/postgresql -n trino -f hive-metastore-postgresql/values.yaml
 helm upgrade --install my-hive-metastore -n trino -f hive-metastore/values.yaml ./charts/hive-metastore
-helm upgrade --install my-trino trino/trino --version 0.3.0 --namespace trino -f trino/values.yaml
+helm upgrade --install my-trino trino/trino --version 0.4.0 --namespace trino -f trino/values.yaml
 )

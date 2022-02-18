@@ -1,7 +1,5 @@
 image:
-  # https://github.com/trinodb/charts/pull/18
-  # query.max-total-memory-per-node was removed from trino 369
-  tag: 368
+  tag: 370
 
 additionalCatalogs:
   blackhole: |
