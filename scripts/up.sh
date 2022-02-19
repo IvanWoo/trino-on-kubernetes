@@ -8,6 +8,8 @@ REPO_DIR="${BASE_DIR}/.."
 (
 cd ${REPO_DIR}
 kubectl create namespace trino --dry-run=client -o yaml | kubectl apply -f -
+kubectl apply -f https://raw.githubusercontent.com/Altinity/clickhouse-operator/master/deploy/operator/clickhouse-operator-install-bundle.yaml
+kubectl apply -f clickhouse/ -n trino
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add trino https://trinodb.github.io/charts/
 helm upgrade --install my-postgresql bitnami/postgresql -n trino -f postgresql/values.yaml

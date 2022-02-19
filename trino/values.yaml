@@ -20,3 +20,8 @@ additionalCatalogs:
     hive.s3select-pushdown.enabled=true
     hive.storage-format=ORC
     hive.allow-drop-table=true
+  clickhouse: |
+    connector.name=clickhouse
+    connection-url=jdbc:clickhouse://clickhouse-bootstrap:8123/
+    connection-user=analytics
+    connection-password=admin

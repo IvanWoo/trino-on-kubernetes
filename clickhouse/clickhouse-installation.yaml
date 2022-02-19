@@ -1,0 +1,56 @@
+apiVersion: "clickhouse.altinity.com/v1"
+kind: "ClickHouseInstallation"
+metadata:
+  name: "bootstrap"
+spec:
+  configuration:
+    users:
+      default/password: admin
+      analytics/password: admin
+      analytics/profile: default
+      analytics/quota: default
+      analytics/networks/ip: "::/0"
+    clusters:
+      - name: "bootstrap"
+        layout:
+          shardsCount: 1
+          replicasCount: 1
+  defaults:
+    templates:
+      podTemplate: pod-template
+      dataVolumeClaimTemplate: data-volume-template
+      logVolumeClaimTemplate: log-volume-template
+
+  templates:
+    podTemplates:
+      - name: pod-template
+        spec:
+          containers:
+            - name: clickhouse
+              # FIXME: use official docker image
+              # https://github.com/ClickHouse/ClickHouse/issues/22222
+              # image: yandex/clickhouse-server:20.7
+              image: altinity/clickhouse-server:21.12.3.32.altinitydev.arm
+              volumeMounts:
+                - name: bootstrap-configmap-volume
+                  mountPath: /docker-entrypoint-initdb.d
+          volumes:
+            - name: bootstrap-configmap-volume
+              configMap:
+                name: clickhouse-bootstrap-mounted-configmap
+
+    volumeClaimTemplates:
+      - name: data-volume-template
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 10Gi
+      - name: log-volume-template
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi

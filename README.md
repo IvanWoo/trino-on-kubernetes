@@ -12,11 +12,13 @@ In this repo, we are using the [Kubernetes](https://kubernetes.io/) to deploy th
   - [hive-metastore](#hive-metastore)
     - [hive-metastore-postgresql](#hive-metastore-postgresql)
     - [hive-metastore](#hive-metastore-1)
+  - [clickhouse](#clickhouse)
   - [trino](#trino)
 - [playground](#playground)
   - [blackhole connector](#blackhole-connector)
   - [postgresql connector](#postgresql-connector)
   - [hive connector](#hive-connector)
+  - [clickhouse connector](#clickhouse-connector)
 - [cleanup](#cleanup)
 - [references](#references)
 
@@ -156,6 +158,67 @@ kubectl run hive-metastore-postgresql-client --rm --tty -i --restart='Never' --n
 ...
 ```
 
+### clickhouse
+
+follow the [altinity clickhouse operator](https://github.com/Altinity/clickhouse-operator) to install clickhouse
+
+install the Custom Resource Definition(crd)
+
+```sh
+kubectl apply -f https://raw.githubusercontent.com/Altinity/clickhouse-operator/master/deploy/operator/clickhouse-operator-install-bundle.yaml
+```
+
+the following results are expected
+
+```sh
+customresourcedefinition.apiextensions.k8s.io/clickhouseinstallations.clickhouse.altinity.com created
+customresourcedefinition.apiextensions.k8s.io/clickhouseinstallationtemplates.clickhouse.altinity.com created
+customresourcedefinition.apiextensions.k8s.io/clickhouseoperatorconfigurations.clickhouse.altinity.com created
+serviceaccount/clickhouse-operator created
+clusterrole.rbac.authorization.k8s.io/clickhouse-operator-kube-system created
+clusterrolebinding.rbac.authorization.k8s.io/clickhouse-operator-kube-system created
+configmap/etc-clickhouse-operator-files created
+configmap/etc-clickhouse-operator-confd-files created
+configmap/etc-clickhouse-operator-configd-files created
+configmap/etc-clickhouse-operator-templatesd-files created
+configmap/etc-clickhouse-operator-usersd-files created
+deployment.apps/clickhouse-operator created
+service/clickhouse-operator-metrics created
+```
+
+verify the crd
+
+```sh
+kubectl get pods --namespace kube-system
+```
+
+```sh
+NAME                                      READY   STATUS      RESTARTS        AGE
+...
+clickhouse-operator-78f59f855b-pqntt      2/2     Running     0               57s
+...
+```
+
+install the clickhouse via operator
+
+```sh
+kubectl apply -f clickhouse/ -n trino
+```
+
+verify the installation
+
+```sh
+kubectl exec chi-bootstrap-bootstrap-0-0-0 -n trino -- clickhouse-client -u analytics --password admin --query="SHOW DATABASES"
+```
+
+```sh
+INFORMATION_SCHEMA
+default
+information_schema
+psql
+system
+```
+
 ### trino
 
 follow the [trino official chart](https://github.com/trinodb/charts/tree/main) to install trino
@@ -188,19 +251,20 @@ SHOW CATALOGS;
   Catalog
 ------------
  blackhole
+ clickhouse
  minio
  postgresql
  system
  tpcds
  tpch
-(6 rows)
+(7 rows)
 ```
 
 ### blackhole connector
 
 ```sh
 CREATE SCHEMA blackhole.test;
-CREATE TABLE blackhole.test.orders AS SELECT * from tpch.tiny.orders;
+CREATE TABLE blackhole.test.orders AS SELECT * FROM tpch.tiny.orders;
 INSERT INTO blackhole.test.orders SELECT * FROM tpch.sf3.orders;
 ```
 
@@ -283,6 +347,64 @@ SHOW SCHEMAS IN minio;
 (3 rows)
 ```
 
+### clickhouse connector
+
+```sh
+SHOW SCHEMAS IN clickhouse;
+```
+
+```sh
+       Schema
+--------------------
+ default
+ information_schema
+ psql
+ system
+(4 rows)
+```
+
+no data in the clickhouse
+
+```sh
+SELECT * FROM clickhouse.psql.users limit 10;
+```
+
+```sh
+ hash_firstname | hash_lastname | gender
+----------------+---------------+--------
+(0 rows)
+```
+
+insert from postgresql.public.users 
+
+```sh
+INSERT INTO clickhouse.psql.users
+SELECT to_utf8(hash_firstname), to_utf8(hash_lastname), to_utf8(gender) FROM postgresql.public.users;
+```
+
+```sh
+SELECT
+  from_utf8(hash_firstname) as hash_firstname,
+  from_utf8(hash_lastname) as hash_lastname,
+  from_utf8(gender) as gender
+FROM clickhouse.psql.users limit 10;
+```
+
+```sh
+          hash_firstname          |          hash_lastname           | gender
+----------------------------------+----------------------------------+--------
+ aed49d619bcf829c41d29bf48d2d5825 | 0d4795a498e0baf87fe0aecd627a960a | female
+ 97b8e38f05d19fe1b8759aaa583b3623 | dd7cb0aa18092f1ed205aab78a01ca63 | male
+ ef22320d1409546ec11de4b0e3a2968e | 092edfd88d68340ea4dbbff1a7a20f07 | male
+ 3a74c6efbf66f00e9d944e41f3edb6da | 42f3b109c6c224d07347adfcb697cddc | female
+ 9b5ef82415b32b2c2b3b7fd12ecc1279 | fa2a6cf03fdecb863f337fd5af413358 | male
+ dd616a7291150e07214355d5443297ac | 0133d5f34a48c31b4f80aec84a8f4ca7 | female
+ bc44e7cbae828d2829831f9d2efdbff7 | 9a96db30be5bd5e2d653b5d37d8a7592 | female
+ b3a46696e4c089742123d9cc6e4bf901 | 8d99a00cbc440d71709cc6fba8d3f605 | male
+ ca5e93ecd5729eb0a40814aca7de80f3 | 052ba042b4cfe29bd5fb040dbb58ad88 | female
+ eb2544b415fc7440bd727ad7790741ef | b58736031ae630b4e1266ab359f33a35 | female
+```
+
 ## cleanup
 
 tl;dr: `bash scripts/down.sh`
@@ -293,6 +415,8 @@ helm uninstall my-postgresql -n trino
 helm uninstall my-hive-metastore -n trino
 helm uninstall hive-metastore-postgresql -n trino
 helm uninstall my-minio -n trino
+kubectl delete -f clickhouse/ -n trino
+kubectl delete -f https://raw.githubusercontent.com/Altinity/clickhouse-operator/master/deploy/operator/clickhouse-operator-install-bundle.yaml
 kubectl delete pvc --all -n trino
 kubectl delete namespace trino
 ```

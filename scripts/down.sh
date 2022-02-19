@@ -12,6 +12,8 @@ helm uninstall my-postgresql -n trino
 helm uninstall my-hive-metastore -n trino
 helm uninstall hive-metastore-postgresql -n trino
 helm uninstall my-minio -n trino
+kubectl delete -f clickhouse/ -n trino
+kubectl delete -f https://raw.githubusercontent.com/Altinity/clickhouse-operator/master/deploy/operator/clickhouse-operator-install-bundle.yaml
 kubectl delete pvc --all -n trino
 kubectl delete namespace trino
 )

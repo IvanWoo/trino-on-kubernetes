@@ -26,6 +26,7 @@ update_up() {
     local OUT_FILE=$UP_FILE
     reset_out_file ${OUT_FILE}
     awk '/^(kubectl create)/' $README_FILE >>$OUT_FILE
+    awk '/^(kubectl apply)/' $README_FILE >>$OUT_FILE
     awk '/^(helm repo)/' $README_FILE | uniq >>$OUT_FILE
     awk '/^(helm upgrade)/' $README_FILE >>$OUT_FILE
     echo ")" >>$OUT_FILE

@@ -1,0 +1,23 @@
+# https://www.lhsz.xyz/read/clickhouse-20.3-en/b5c3d6334fd07880.md
+apiVersion: v1
+kind: "ConfigMap"
+metadata:
+  name: "clickhouse-bootstrap-mounted-configmap"
+data:
+  01_create_databases.sh: |
+    #!/bin/bash
+    set -e
+    clickhouse-client --password admin -n <<-EOSQL
+      CREATE DATABASE IF NOT EXISTS psql;
+    EOSQL
+  02_create_table.sh: |
+    #!/bin/bash
+    set -e
+    clickhouse-client --password admin -n <<-EOSQL
+      CREATE TABLE IF NOT EXISTS psql.users
+      (
+        hash_firstname String,
+        hash_lastname String,
+        gender String
+      ) ENGINE = TinyLog;
+    EOSQL
