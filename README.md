@@ -186,7 +186,7 @@ deployment.apps/clickhouse-operator created
 service/clickhouse-operator-metrics created
 ```
 
-verify the crd
+verify the installation
 
 ```sh
 kubectl get pods --namespace kube-system
@@ -199,7 +199,7 @@ clickhouse-operator-78f59f855b-pqntt      2/2     Running     0               57
 ...
 ```
 
-install the clickhouse via operator
+install the clickhouse via the operator
 
 ```sh
 kubectl apply -f clickhouse/ -n trino
@@ -379,7 +379,11 @@ insert from postgresql.public.users
 
 ```sh
 INSERT INTO clickhouse.psql.users
-SELECT to_utf8(hash_firstname), to_utf8(hash_lastname), to_utf8(gender) FROM postgresql.public.users;
+SELECT
+  to_utf8(hash_firstname),
+  to_utf8(hash_lastname),
+  to_utf8(gender)
+FROM postgresql.public.users;
 ```
 
 ```sh
