@@ -29,7 +29,7 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
-              until nc -z -v -w30 {{ .Values.hiveMetastoreDb.host }} {{ .Values.hiveMetastoreDb.port }}; do
+              until nc -z -v -w90 {{ .Values.hiveMetastoreDb.host }} {{ .Values.hiveMetastoreDb.port }}; do
                 echo "Waiting for Hive Metastore DB to be ready..."
                 sleep 5
               done
