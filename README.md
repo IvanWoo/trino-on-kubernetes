@@ -20,6 +20,7 @@ In this repo, we are using the [Kubernetes](https://kubernetes.io/) to deploy th
   - [postgresql connector](#postgresql-connector)
   - [hive connector](#hive-connector)
   - [clickhouse connector](#clickhouse-connector)
+- [redis connector](#redis-connector)
 - [cleanup](#cleanup)
 - [references](#references)
 
