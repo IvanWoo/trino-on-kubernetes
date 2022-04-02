@@ -8,6 +8,7 @@ REPO_DIR="${BASE_DIR}/.."
 (
 cd ${REPO_DIR}
 kubectl create namespace trino --dry-run=client -o yaml | kubectl apply -f -
+kubectl create secret generic redis-table-definition --from-file=redis/test.json -n trino
 kubectl apply -f https://raw.githubusercontent.com/Altinity/clickhouse-operator/master/deploy/operator/clickhouse-operator-install-bundle.yaml
 kubectl apply -f clickhouse/ -n trino
 helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -16,5 +17,6 @@ helm upgrade --install my-postgresql bitnami/postgresql -n trino -f postgresql/v
 helm upgrade --install my-minio bitnami/minio -n trino -f minio/values.yaml
 helm upgrade --install hive-metastore-postgresql bitnami/postgresql -n trino -f hive-metastore-postgresql/values.yaml
 helm upgrade --install my-hive-metastore -n trino -f hive-metastore/values.yaml ./charts/hive-metastore
-helm upgrade --install my-trino trino/trino --version 0.5.0 --namespace trino -f trino/values.yaml
+helm upgrade --install my-redis bitnami/redis -n trino -f redis/values.yaml
+helm upgrade --install my-trino trino/trino --version 0.7.0 --namespace trino -f trino/values.yaml
 )

@@ -25,3 +25,14 @@ additionalCatalogs:
     connection-url=jdbc:clickhouse://clickhouse-bootstrap:8123/
     connection-user=analytics
     connection-password=admin
+  redis: |
+    connector.name=redis
+    redis.table-names=test
+    redis.nodes=my-redis-master:6379
+    redis.password=trino_demo_password
+    redis.table-description-dir=/etc/redis
+
+secretMounts:
+  - name: redis-table-schema-volumn
+    path: /etc/redis
+    secretName: redis-table-definition

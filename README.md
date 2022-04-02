@@ -13,6 +13,7 @@ In this repo, we are using the [Kubernetes](https://kubernetes.io/) to deploy th
     - [hive-metastore-postgresql](#hive-metastore-postgresql)
     - [hive-metastore](#hive-metastore-1)
   - [clickhouse](#clickhouse)
+  - [redis](#redis)
   - [trino](#trino)
 - [playground](#playground)
   - [blackhole connector](#blackhole-connector)
@@ -24,7 +25,7 @@ In this repo, we are using the [Kubernetes](https://kubernetes.io/) to deploy th
 
 
 ## prerequisites
-- [Rancher Desktop](https://github.com/rancher-sandbox/rancher-desktop): `1.0.1`
+- [Rancher Desktop](https://github.com/rancher-sandbox/rancher-desktop): `1.2.1`
 - Kubernetes: `v1.22.6`
 - kubectl `v1.23.3`
 - Helm: `v3.7.2`
@@ -219,6 +220,37 @@ psql
 system
 ```
 
+### redis
+
+follow the [bitnami redis chart](https://github.com/bitnami/charts/tree/master/bitnami/redis) to install redis
+
+```sh
+helm repo add bitnami https://charts.bitnami.com/bitnami
+```
+
+```sh
+helm upgrade --install my-redis bitnami/redis -n trino -f redis/values.yaml
+```
+
+verify the installation
+
+```sh
+kubectl exec -it svc/my-redis-master -n trino -- redis-cli -h my-redis-master -a trino_demo_password scan 0
+```
+
+```sh
+Warning: Using a password with '-a' or '-u' option on the command line interface may not be safe.
+1) "0"
+2) (empty array)
+```
+
+create the redis table definition config-map
+
+```sh
+kubectl create secret generic redis-table-definition --from-file=redis/test.json -n trino
+```
+
+
 ### trino
 
 follow the [trino official chart](https://github.com/trinodb/charts/tree/main) to install trino
@@ -228,7 +260,7 @@ helm repo add trino https://trinodb.github.io/charts/
 ```
 
 ```sh
-helm upgrade --install my-trino trino/trino --version 0.5.0 --namespace trino -f trino/values.yaml
+helm upgrade --install my-trino trino/trino --version 0.7.0 --namespace trino -f trino/values.yaml
 ```
 
 verify the installation
@@ -248,16 +280,17 @@ kubectl exec -it deploy/my-trino-coordinator -n trino -- trino
 ```sh
 SHOW CATALOGS;
 
-  Catalog
+  Catalog   
 ------------
- blackhole
- clickhouse
- minio
- postgresql
- system
- tpcds
- tpch
-(7 rows)
+ blackhole  
+ clickhouse 
+ minio      
+ postgresql 
+ redis      
+ system     
+ tpcds      
+ tpch       
+(8 rows)
 ```
 
 ### blackhole connector
@@ -409,12 +442,57 @@ FROM clickhouse.psql.users limit 10;
  eb2544b415fc7440bd727ad7790741ef | b58736031ae630b4e1266ab359f33a35 | female
 ```
 
+## redis connector
+
+```sh
+SHOW SCHEMAS IN redis;
+```
+
+```sh
+       Schema       
+--------------------
+ information_schema 
+ trino              
+(2 rows)
+```
+
+```sh
+SHOW COLUMNS IN redis.default.test;
+```
+
+```sh
+ Column |  Type   | Extra | Comment 
+--------+---------+-------+---------
+ number | integer |       |         
+(1 row)
+```
+
+save some test data in the redis
+
+```sh
+kubectl exec -it svc/my-redis-master -n trino -- redis-cli -h my-redis-master -a trino_demo_password set test '{"number": 20}'
+```
+
+read from trino
+
+```sh
+SELECT * FROM redis.default.test LIMIT 10;
+```
+
+```sh
+ number 
+--------
+     20 
+(1 row)
+```
+
 ## cleanup
 
 tl;dr: `bash scripts/down.sh`
 
 ```sh
 helm uninstall my-trino -n trino
+helm uninstall my-redis -n trino
 helm uninstall my-postgresql -n trino
 helm uninstall my-hive-metastore -n trino
 helm uninstall hive-metastore-postgresql -n trino
