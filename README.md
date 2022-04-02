@@ -20,7 +20,7 @@ In this repo, we are using the [Kubernetes](https://kubernetes.io/) to deploy th
   - [postgresql connector](#postgresql-connector)
   - [hive connector](#hive-connector)
   - [clickhouse connector](#clickhouse-connector)
-- [redis connector](#redis-connector)
+  - [redis connector](#redis-connector)
 - [cleanup](#cleanup)
 - [references](#references)
 
@@ -443,7 +443,7 @@ FROM clickhouse.psql.users limit 10;
  eb2544b415fc7440bd727ad7790741ef | b58736031ae630b4e1266ab359f33a35 | female
 ```
 
-## redis connector
+### redis connector
 
 ```sh
 SHOW SCHEMAS IN redis;
