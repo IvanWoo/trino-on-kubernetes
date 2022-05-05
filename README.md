@@ -337,6 +337,8 @@ SELECT * FROM postgresql.public.users LIMIT 10;
 
 ### hive connector
 
+FIXME: for some unknown timing issue, the minio connector cannot establish every time properly, deleting and recreating `hive-metastore-postgresql` can mitigate the issue
+
 follow [Hive connector over MinIO file storage tutorial](https://github.com/bitsondatadev/trino-getting-started/tree/main/hive/trino-minio) to test the hive connector
 
 ```sh
@@ -382,6 +384,21 @@ SHOW SCHEMAS IN minio;
 ```
 
 ### clickhouse connector
+
+create database and table
+
+```sh
+kubectl exec chi-bootstrap-bootstrap-0-0-0 -n trino -c clickhouse -- clickhouse-client -u analytics --password admin --query="CREATE DATABASE IF NOT EXISTS psql;"
+```
+
+```sh
+kubectl exec chi-bootstrap-bootstrap-0-0-0 -n trino -c clickhouse -- clickhouse-client -u analytics --password admin --query="CREATE TABLE IF NOT EXISTS psql.users
+(
+  hash_firstname String,
+  hash_lastname String,
+  gender String
+) ENGINE = TinyLog;"
+```
 
 ```sh
 SHOW SCHEMAS IN clickhouse;

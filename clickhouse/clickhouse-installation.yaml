@@ -27,17 +27,15 @@ spec:
         spec:
           containers:
             - name: clickhouse
-              # FIXME: use official docker image
-              # https://github.com/ClickHouse/ClickHouse/issues/22222
-              # image: yandex/clickhouse-server:20.7
-              image: altinity/clickhouse-server:21.12.3.32.altinitydev.arm
-              volumeMounts:
-                - name: bootstrap-configmap-volume
-                  mountPath: /docker-entrypoint-initdb.d
-          volumes:
-            - name: bootstrap-configmap-volume
-              configMap:
-                name: clickhouse-bootstrap-mounted-configmap
+              image: clickhouse/clickhouse-server:22.3
+          # FIXME: docker-entrypoint-initdb.d doesn't work for 22.3
+          #     volumeMounts:
+          #       - name: bootstrap-configmap-volume
+          #         mountPath: /docker-entrypoint-initdb.d
+          # volumes:
+          #   - name: bootstrap-configmap-volume
+          #     configMap:
+          #       name: clickhouse-bootstrap-mounted-configmap
 
     volumeClaimTemplates:
       - name: data-volume-template
